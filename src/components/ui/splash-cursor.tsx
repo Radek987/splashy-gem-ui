@@ -2,8 +2,8 @@
 import * as React from "react";
 import { useEffect, useRef } from "react";
 
-// Declare gl as a global variable for WebGL context
-let gl: WebGLRenderingContext;
+// Declare gl as a mutable variable for WebGL context
+let gl: WebGLRenderingContext | null = null;
 
 // Add missing utility functions
 function hashCode(s: string): number {
@@ -1241,16 +1241,6 @@ const SplashCursor: React.FC<{
     function scaleByPixelRatio(input) {
       const pixelRatio = window.devicePixelRatio || 1;
       return Math.floor(input * pixelRatio);
-    }
-
-    function hashCode(s) {
-      if (s.length === 0) return 0;
-      let hash = 0;
-      for (let i = 0; i < s.length; i++) {
-        hash = (hash << 5) - hash + s.charCodeAt(i);
-        hash |= 0;
-      }
-      return hash;
     }
 
     window.addEventListener("mousedown", (e) => {
