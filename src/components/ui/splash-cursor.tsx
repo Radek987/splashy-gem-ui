@@ -226,6 +226,7 @@ const SplashCursor: React.FC<{
     let pointers = [new pointerPrototype()];
 
     const { gl: contextGL, ext } = getWebGLContext(canvas);
+    gl = contextGL; // Reassign the global gl variable with the context from getWebGLContext
     if (!ext.supportLinearFiltering) {
       config.DYE_RESOLUTION = 256;
       config.SHADING = false;
