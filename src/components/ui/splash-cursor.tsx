@@ -15,6 +15,35 @@ interface ProgramProps {
   program: WebGLProgram;
 }
 
+class Material implements MaterialProps {
+  vertexShader: WebGLShader;
+  fragmentShaderSource: string;
+  programs: { [key: number]: WebGLProgram };
+  activeProgram: WebGLProgram | null;
+  uniforms: { [key: string]: WebGLUniformLocation };
+
+  constructor(vertexShader: WebGLShader, fragmentShaderSource: string) {
+    this.vertexShader = vertexShader;
+    this.fragmentShaderSource = fragmentShaderSource;
+    this.programs = {};
+    this.activeProgram = null;
+    this.uniforms = {};
+  }
+}
+
+class Program implements ProgramProps {
+  uniforms: { [key: string]: WebGLUniformLocation };
+  program: WebGLProgram;
+
+  constructor(vertexShader: WebGLShader, fragmentShader: WebGLShader) {
+    this.uniforms = {};
+    this.program = gl.createProgram()!;
+    gl.attachShader(this.program, vertexShader);
+    gl.attachShader(this.program, fragmentShader);
+    gl.linkProgram(this.program);
+  }
+}
+
 const SplashCursor: React.FC<{
   SIM_RESOLUTION?: number;
   DYE_RESOLUTION?: number;
