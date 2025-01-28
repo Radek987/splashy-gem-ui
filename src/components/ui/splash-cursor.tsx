@@ -16,6 +16,16 @@ function hashCode(s: string): number {
   return hash;
 }
 
+// Add the missing addKeywords function
+function addKeywords(source: string, keywords?: string[]): string {
+  if (!keywords) return source;
+  let keywordsString = "";
+  keywords.forEach((keyword) => {
+    keywordsString += "#define " + keyword + "\n";
+  });
+  return keywordsString + source;
+}
+
 function compileShader(
   gl: WebGLRenderingContext,
   type: number,
