@@ -15,6 +15,59 @@ interface ProgramProps {
   program: WebGLProgram;
 }
 
+class Material implements MaterialProps {
+  vertexShader: WebGLShader;
+  fragmentShaderSource: string;
+  programs: { [key: number]: WebGLProgram };
+  activeProgram: WebGLProgram | null;
+  uniforms: { [key: string]: WebGLUniformLocation };
+
+  constructor(vertexShader: WebGLShader, fragmentShaderSource: string) {
+    this.vertexShader = vertexShader;
+    this.fragmentShaderSource = fragmentShaderSource;
+    this.programs = {};
+    this.activeProgram = null;
+    this.uniforms = {};
+  }
+
+  setKeywords(keywords: string[]) {
+    let hash = 0;
+    for (let i = 0; i < keywords.length; i++) hash += hashCode(keywords[i]);
+    let program = this.programs[hash];
+    if (program == null) {
+      let fragmentShader = compileShader(
+        gl,
+        gl.FRAGMENT_SHADER,
+        this.fragmentShaderSource,
+        keywords
+      );
+      program = createProgram(this.vertexShader, fragmentShader);
+      this.programs[hash] = program;
+    }
+    if (program === this.activeProgram) return;
+    this.uniforms = getUniforms(program);
+    this.activeProgram = program;
+  }
+
+  bind() {
+    gl.useProgram(this.activeProgram);
+  }
+}
+
+class Program implements ProgramProps {
+  uniforms: { [key: string]: WebGLUniformLocation };
+  program: WebGLProgram;
+
+  constructor(vertexShader: WebGLShader, fragmentShader: WebGLShader) {
+    this.program = createProgram(vertexShader, fragmentShader);
+    this.uniforms = getUniforms(this.program);
+  }
+
+  bind() {
+    gl.useProgram(this.program);
+  }
+}
+
 const SplashCursor: React.FC<{
   SIM_RESOLUTION?: number;
   DYE_RESOLUTION?: number;
@@ -199,45 +252,23 @@ const SplashCursor: React.FC<{
       return status === gl.FRAMEBUFFER_COMPLETE;
     }
 
-    class Material {
-      constructor(vertexShader, fragmentShaderSource) {
-        this.vertexShader = vertexShader;
-        this.fragmentShaderSource = fragmentShaderSource;
-        this.programs = [];
-        this.activeProgram = null;
-        this.uniforms = [];
-      }
-      setKeywords(keywords) {
-        let hash = 0;
-        for (let i = 0; i < keywords.length; i++) hash += hashCode(keywords[i]);
-        let program = this.programs[hash];
-        if (program == null) {
-          let fragmentShader = compileShader(
-            gl.FRAGMENT_SHADER,
-            this.fragmentShaderSource,
-            keywords
-          );
-          program = createProgram(this.vertexShader, fragmentShader);
-          this.programs[hash] = program;
-        }
-        if (program === this.activeProgram) return;
-        this.uniforms = getUniforms(program);
-        this.activeProgram = program;
-      }
-      bind() {
-        gl.useProgram(this.activeProgram);
-      }
-    }
-
-    class Program {
-      constructor(vertexShader, fragmentShader) {
-        this.uniforms = {};
-        this.program = createProgram(vertexShader, fragmentShader);
-        this.uniforms = getUniforms(this.program);
-      }
-      bind() {
-        gl.useProgram(this.program);
-      }
+    function compileShader(
+      gl: WebGLRenderingContext,
+      type: number,
+      source: string,
+      keywords?: string[]
+    ): WebGLShader {
+      source = addKeywords(source, keywords);
+      const shader = gl.createShader(type);
+      if (!shader) throw new Error("Failed to create shader");
+      
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+        console.trace(gl.getShaderInfoLog(shader));
+      
+      return shader;
     }
 
     function createProgram(vertexShader, fragmentShader) {
@@ -260,16 +291,6 @@ const SplashCursor: React.FC<{
       return uniforms;
     }
 
-    function compileShader(type, source, keywords) {
-      source = addKeywords(source, keywords);
-      const shader = gl.createShader(type);
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-        console.trace(gl.getShaderInfoLog(shader));
-      return shader;
-    }
-
     function addKeywords(source, keywords) {
       if (!keywords) return source;
       let keywordsString = "";
@@ -280,6 +301,7 @@ const SplashCursor: React.FC<{
     }
 
     const baseVertexShader = compileShader(
+      gl,
       gl.VERTEX_SHADER,
       `
         precision highp float;
@@ -303,6 +325,7 @@ const SplashCursor: React.FC<{
     );
 
     const copyShader = compileShader(
+      gl,
       gl.FRAGMENT_SHADER,
       `
         precision mediump float;
@@ -317,6 +340,7 @@ const SplashCursor: React.FC<{
     );
 
     const clearShader = compileShader(
+      gl,
       gl.FRAGMENT_SHADER,
       `
         precision mediump float;
@@ -373,6 +397,7 @@ const SplashCursor: React.FC<{
     `;
 
     const splatShader = compileShader(
+      gl,
       gl.FRAGMENT_SHADER,
       `
         precision highp float;
@@ -395,6 +420,7 @@ const SplashCursor: React.FC<{
     );
 
     const advectionShader = compileShader(
+      gl,
       gl.FRAGMENT_SHADER,
       `
         precision highp float;
@@ -436,6 +462,7 @@ const SplashCursor: React.FC<{
     );
 
     const divergenceShader = compileShader(
+      gl,
       gl.FRAGMENT_SHADER,
       `
         precision mediump float;
@@ -466,6 +493,7 @@ const SplashCursor: React.FC<{
     );
 
     const curlShader = compileShader(
+      gl,
       gl.FRAGMENT_SHADER,
       `
         precision mediump float;
@@ -489,6 +517,7 @@ const SplashCursor: React.FC<{
     );
 
     const vorticityShader = compileShader(
+      gl,
       gl.FRAGMENT_SHADER,
       `
         precision highp float;
@@ -524,6 +553,7 @@ const SplashCursor: React.FC<{
     );
 
     const pressureShader = compileShader(
+      gl,
       gl.FRAGMENT_SHADER,
       `
         precision mediump float;
@@ -550,6 +580,7 @@ const SplashCursor: React.FC<{
     );
 
     const gradientSubtractShader = compileShader(
+      gl,
       gl.FRAGMENT_SHADER,
       `
         precision mediump float;
