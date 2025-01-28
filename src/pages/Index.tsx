@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { SplashCursor } from "@/components/ui/splash-cursor";
 import { Mail, MessageSquare, Shield, Link, Check, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { SplashCursor } from "@/components/ui/splash-cursor";
 
 const Index = () => {
   return (
@@ -12,7 +12,10 @@ const Index = () => {
       <div className="relative z-10">
         <nav className="container mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold gradient-text">EmailAI</div>
+            <div className="flex flex-col items-start">
+              <div className="text-2xl font-bold gradient-text">Y-E-M</div>
+              <div className="text-sm text-gray-600">Your Email Manager</div>
+            </div>
             <div className="hidden md:flex space-x-8">
               <a href="#features" className="text-gray-600 hover:text-gray-900">Features</a>
               <a href="#pricing" className="text-gray-600 hover:text-gray-900">Pricing</a>
@@ -196,7 +199,7 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">EmailAI</h3>
+              <h3 className="text-xl font-bold mb-4">Y-E-M</h3>
               <p className="text-gray-400">Transform your inbox experience</p>
             </div>
             <div>
