@@ -2,85 +2,6 @@
 import * as React from "react";
 import { useEffect, useRef } from "react";
 
-// Declare gl as a mutable variable for WebGL context
-let gl: WebGLRenderingContext | null = null;
-
-// Add missing utility functions
-function hashCode(s: string): number {
-  if (s.length === 0) return 0;
-  let hash = 0;
-  for (let i = 0; i < s.length; i++) {
-    hash = (hash << 5) - hash + s.charCodeAt(i);
-    hash |= 0;
-  }
-  return hash;
-}
-
-// Add the missing addKeywords function
-function addKeywords(source: string, keywords?: string[]): string {
-  if (!keywords) return source;
-  let keywordsString = "";
-  keywords.forEach((keyword) => {
-    keywordsString += "#define " + keyword + "\n";
-  });
-  return keywordsString + source;
-}
-
-function compileShader(
-  gl: WebGLRenderingContext,
-  type: number,
-  source: string,
-  keywords?: string[]
-): WebGLShader {
-  source = addKeywords(source, keywords);
-  const shader = gl.createShader(type);
-  if (!shader) throw new Error("Failed to create shader");
-  
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-    console.trace(gl.getShaderInfoLog(shader));
-  
-  return shader;
-}
-
-function createProgram(vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram {
-  if (!gl) throw new Error("WebGL context not initialized");
-  
-  const program = gl.createProgram();
-  if (!program) throw new Error("Failed to create program");
-  
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-  gl.linkProgram(program);
-  
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS))
-    console.trace(gl.getProgramInfoLog(program));
-  
-  return program;
-}
-
-function getUniforms(program: WebGLProgram): { [key: string]: WebGLUniformLocation } {
-  if (!gl) throw new Error("WebGL context not initialized");
-  
-  const uniforms: { [key: string]: WebGLUniformLocation } = {};
-  const uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-  
-  for (let i = 0; i < uniformCount; i++) {
-    const uniformInfo = gl.getActiveUniform(program, i);
-    if (uniformInfo) {
-      const uniformName = uniformInfo.name;
-      const location = gl.getUniformLocation(program, uniformName);
-      if (location) {
-        uniforms[uniformName] = location;
-      }
-    }
-  }
-  
-  return uniforms;
-}
-
 interface MaterialProps {
   vertexShader: WebGLShader;
   fragmentShaderSource: string;
@@ -92,59 +13,6 @@ interface MaterialProps {
 interface ProgramProps {
   uniforms: { [key: string]: WebGLUniformLocation };
   program: WebGLProgram;
-}
-
-class Material implements MaterialProps {
-  vertexShader: WebGLShader;
-  fragmentShaderSource: string;
-  programs: { [key: number]: WebGLProgram };
-  activeProgram: WebGLProgram | null;
-  uniforms: { [key: string]: WebGLUniformLocation };
-
-  constructor(vertexShader: WebGLShader, fragmentShaderSource: string) {
-    this.vertexShader = vertexShader;
-    this.fragmentShaderSource = fragmentShaderSource;
-    this.programs = {};
-    this.activeProgram = null;
-    this.uniforms = {};
-  }
-
-  setKeywords(keywords: string[]) {
-    let hash = 0;
-    for (let i = 0; i < keywords.length; i++) hash += hashCode(keywords[i]);
-    let program = this.programs[hash];
-    if (program == null) {
-      let fragmentShader = compileShader(
-        gl,
-        gl.FRAGMENT_SHADER,
-        this.fragmentShaderSource,
-        keywords
-      );
-      program = createProgram(this.vertexShader, fragmentShader);
-      this.programs[hash] = program;
-    }
-    if (program === this.activeProgram) return;
-    this.uniforms = getUniforms(program);
-    this.activeProgram = program;
-  }
-
-  bind() {
-    gl.useProgram(this.activeProgram);
-  }
-}
-
-class Program implements ProgramProps {
-  uniforms: { [key: string]: WebGLUniformLocation };
-  program: WebGLProgram;
-
-  constructor(vertexShader: WebGLShader, fragmentShader: WebGLShader) {
-    this.program = createProgram(vertexShader, fragmentShader);
-    this.uniforms = getUniforms(this.program);
-  }
-
-  bind() {
-    gl.useProgram(this.program);
-  }
 }
 
 const SplashCursor: React.FC<{
@@ -184,14 +52,6 @@ const SplashCursor: React.FC<{
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Initialize WebGL context
-    const context = canvas.getContext('webgl');
-    if (!context) {
-      console.error('WebGL not supported');
-      return;
-    }
-    gl = context; // Set the global gl variable
-
     function pointerPrototype() {
       this.id = -1;
       this.texcoordX = 0;
@@ -225,8 +85,7 @@ const SplashCursor: React.FC<{
 
     let pointers = [new pointerPrototype()];
 
-    const { gl: contextGL, ext } = getWebGLContext(canvas);
-    gl = contextGL; // Reassign the global gl variable with the context from getWebGLContext
+    const { gl, ext } = getWebGLContext(canvas);
     if (!ext.supportLinearFiltering) {
       config.DYE_RESOLUTION = 256;
       config.SHADING = false;
@@ -340,8 +199,87 @@ const SplashCursor: React.FC<{
       return status === gl.FRAMEBUFFER_COMPLETE;
     }
 
+    class Material {
+      constructor(vertexShader, fragmentShaderSource) {
+        this.vertexShader = vertexShader;
+        this.fragmentShaderSource = fragmentShaderSource;
+        this.programs = [];
+        this.activeProgram = null;
+        this.uniforms = [];
+      }
+      setKeywords(keywords) {
+        let hash = 0;
+        for (let i = 0; i < keywords.length; i++) hash += hashCode(keywords[i]);
+        let program = this.programs[hash];
+        if (program == null) {
+          let fragmentShader = compileShader(
+            gl.FRAGMENT_SHADER,
+            this.fragmentShaderSource,
+            keywords
+          );
+          program = createProgram(this.vertexShader, fragmentShader);
+          this.programs[hash] = program;
+        }
+        if (program === this.activeProgram) return;
+        this.uniforms = getUniforms(program);
+        this.activeProgram = program;
+      }
+      bind() {
+        gl.useProgram(this.activeProgram);
+      }
+    }
+
+    class Program {
+      constructor(vertexShader, fragmentShader) {
+        this.uniforms = {};
+        this.program = createProgram(vertexShader, fragmentShader);
+        this.uniforms = getUniforms(this.program);
+      }
+      bind() {
+        gl.useProgram(this.program);
+      }
+    }
+
+    function createProgram(vertexShader, fragmentShader) {
+      let program = gl.createProgram();
+      gl.attachShader(program, vertexShader);
+      gl.attachShader(program, fragmentShader);
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+        console.trace(gl.getProgramInfoLog(program));
+      return program;
+    }
+
+    function getUniforms(program) {
+      let uniforms = [];
+      let uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+      for (let i = 0; i < uniformCount; i++) {
+        let uniformName = gl.getActiveUniform(program, i).name;
+        uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
+      }
+      return uniforms;
+    }
+
+    function compileShader(type, source, keywords) {
+      source = addKeywords(source, keywords);
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+        console.trace(gl.getShaderInfoLog(shader));
+      return shader;
+    }
+
+    function addKeywords(source, keywords) {
+      if (!keywords) return source;
+      let keywordsString = "";
+      keywords.forEach((keyword) => {
+        keywordsString += "#define " + keyword + "\n";
+      });
+      return keywordsString + source;
+    }
+
     const baseVertexShader = compileShader(
-      gl,
       gl.VERTEX_SHADER,
       `
         precision highp float;
@@ -365,7 +303,6 @@ const SplashCursor: React.FC<{
     );
 
     const copyShader = compileShader(
-      gl,
       gl.FRAGMENT_SHADER,
       `
         precision mediump float;
@@ -380,7 +317,6 @@ const SplashCursor: React.FC<{
     );
 
     const clearShader = compileShader(
-      gl,
       gl.FRAGMENT_SHADER,
       `
         precision mediump float;
@@ -437,7 +373,6 @@ const SplashCursor: React.FC<{
     `;
 
     const splatShader = compileShader(
-      gl,
       gl.FRAGMENT_SHADER,
       `
         precision highp float;
@@ -460,7 +395,6 @@ const SplashCursor: React.FC<{
     );
 
     const advectionShader = compileShader(
-      gl,
       gl.FRAGMENT_SHADER,
       `
         precision highp float;
@@ -502,7 +436,6 @@ const SplashCursor: React.FC<{
     );
 
     const divergenceShader = compileShader(
-      gl,
       gl.FRAGMENT_SHADER,
       `
         precision mediump float;
@@ -533,7 +466,6 @@ const SplashCursor: React.FC<{
     );
 
     const curlShader = compileShader(
-      gl,
       gl.FRAGMENT_SHADER,
       `
         precision mediump float;
@@ -557,7 +489,6 @@ const SplashCursor: React.FC<{
     );
 
     const vorticityShader = compileShader(
-      gl,
       gl.FRAGMENT_SHADER,
       `
         precision highp float;
@@ -593,7 +524,6 @@ const SplashCursor: React.FC<{
     );
 
     const pressureShader = compileShader(
-      gl,
       gl.FRAGMENT_SHADER,
       `
         precision mediump float;
@@ -620,7 +550,6 @@ const SplashCursor: React.FC<{
     );
 
     const gradientSubtractShader = compileShader(
-      gl,
       gl.FRAGMENT_SHADER,
       `
         precision mediump float;
@@ -1242,6 +1171,16 @@ const SplashCursor: React.FC<{
     function scaleByPixelRatio(input) {
       const pixelRatio = window.devicePixelRatio || 1;
       return Math.floor(input * pixelRatio);
+    }
+
+    function hashCode(s) {
+      if (s.length === 0) return 0;
+      let hash = 0;
+      for (let i = 0; i < s.length; i++) {
+        hash = (hash << 5) - hash + s.charCodeAt(i);
+        hash |= 0;
+      }
+      return hash;
     }
 
     window.addEventListener("mousedown", (e) => {
