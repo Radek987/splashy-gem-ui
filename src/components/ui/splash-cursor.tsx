@@ -2,6 +2,71 @@
 import * as React from "react";
 import { useEffect, useRef } from "react";
 
+// Declare gl as a global variable for WebGL context
+let gl: WebGLRenderingContext;
+
+// Add missing utility functions
+function hashCode(s: string): number {
+  if (s.length === 0) return 0;
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+    hash = (hash << 5) - hash + s.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash;
+}
+
+function compileShader(
+  gl: WebGLRenderingContext,
+  type: number,
+  source: string,
+  keywords?: string[]
+): WebGLShader {
+  source = addKeywords(source, keywords);
+  const shader = gl.createShader(type);
+  if (!shader) throw new Error("Failed to create shader");
+  
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+    console.trace(gl.getShaderInfoLog(shader));
+  
+  return shader;
+}
+
+function createProgram(vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram {
+  const program = gl.createProgram();
+  if (!program) throw new Error("Failed to create program");
+  
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+    console.trace(gl.getProgramInfoLog(program));
+  
+  return program;
+}
+
+function getUniforms(program: WebGLProgram): { [key: string]: WebGLUniformLocation } {
+  const uniforms: { [key: string]: WebGLUniformLocation } = {};
+  const uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+  
+  for (let i = 0; i < uniformCount; i++) {
+    const uniformInfo = gl.getActiveUniform(program, i);
+    if (uniformInfo) {
+      const uniformName = uniformInfo.name;
+      const location = gl.getUniformLocation(program, uniformName);
+      if (location) {
+        uniforms[uniformName] = location;
+      }
+    }
+  }
+  
+  return uniforms;
+}
+
 interface MaterialProps {
   vertexShader: WebGLShader;
   fragmentShaderSource: string;
@@ -1317,3 +1382,4 @@ const SplashCursor: React.FC<{
 }
 
 export { SplashCursor };
+
