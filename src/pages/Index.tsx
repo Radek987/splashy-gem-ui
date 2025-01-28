@@ -1,18 +1,24 @@
 import { Button } from "@/components/ui/button";
-import { SplashCursor } from "@/components/ui/splash-cursor";
+import { Particles } from "@/components/ui/particles";
 import { Mail, MessageSquare, Shield, Link, Check, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const Index = () => {
   return (
-    <div className="relative min-h-screen">
-      <SplashCursor />
+    <div className="relative min-h-screen bg-gradient-to-b from-gray-100 to-gray-200">
+      <Particles
+        className="absolute inset-0"
+        quantity={100}
+        staticity={50}
+        ease={50}
+        color="#9F9EA1"
+      />
       
       {/* Header/Hero Section */}
       <div className="relative z-10">
         <nav className="container mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold gradient-text">EmailAI</div>
+            <div className="text-2xl font-bold gradient-text">YOUR EMAIL MANAGER</div>
             <div className="hidden md:flex space-x-8">
               <a href="#features" className="text-gray-600 hover:text-gray-900">Features</a>
               <a href="#pricing" className="text-gray-600 hover:text-gray-900">Pricing</a>
@@ -196,7 +202,7 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">EmailAI</h3>
+              <h3 className="text-xl font-bold mb-4">YOUR EMAIL MANAGER</h3>
               <p className="text-gray-400">Transform your inbox experience</p>
             </div>
             <div>
