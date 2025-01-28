@@ -2,6 +2,9 @@
 import * as React from "react";
 import { useEffect, useRef } from "react";
 
+// Declare gl as a mutable global variable
+let gl: WebGLRenderingContext | null = null;
+
 interface MaterialProps {
   vertexShader: WebGLShader;
   fragmentShaderSource: string;
@@ -52,6 +55,14 @@ const SplashCursor: React.FC<{
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // Initialize WebGL context
+    const context = canvas.getContext('webgl');
+    if (!context) {
+      console.error('WebGL not supported');
+      return;
+    }
+    gl = context; // Now we can safely assign to our mutable gl variable
+
     function pointerPrototype() {
       this.id = -1;
       this.texcoordX = 0;
@@ -85,7 +96,7 @@ const SplashCursor: React.FC<{
 
     let pointers = [new pointerPrototype()];
 
-    const { gl, ext } = getWebGLContext(canvas);
+    const { ext } = getWebGLContext(canvas);
     if (!ext.supportLinearFiltering) {
       config.DYE_RESOLUTION = 256;
       config.SHADING = false;
@@ -1260,7 +1271,7 @@ const SplashCursor: React.FC<{
     });
 
     updateFrame();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [
     SIM_RESOLUTION,
     DYE_RESOLUTION,
