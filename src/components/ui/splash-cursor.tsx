@@ -46,6 +46,8 @@ function compileShader(
 }
 
 function createProgram(vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram {
+  if (!gl) throw new Error("WebGL context not initialized");
+  
   const program = gl.createProgram();
   if (!program) throw new Error("Failed to create program");
   
@@ -60,6 +62,8 @@ function createProgram(vertexShader: WebGLShader, fragmentShader: WebGLShader): 
 }
 
 function getUniforms(program: WebGLProgram): { [key: string]: WebGLUniformLocation } {
+  if (!gl) throw new Error("WebGL context not initialized");
+  
   const uniforms: { [key: string]: WebGLUniformLocation } = {};
   const uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
   
@@ -179,6 +183,14 @@ const SplashCursor: React.FC<{
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    // Initialize WebGL context
+    const context = canvas.getContext('webgl');
+    if (!context) {
+      console.error('WebGL not supported');
+      return;
+    }
+    gl = context; // Set the global gl variable
 
     function pointerPrototype() {
       this.id = -1;
@@ -325,54 +337,6 @@ const SplashCursor: React.FC<{
       );
       const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
       return status === gl.FRAMEBUFFER_COMPLETE;
-    }
-
-    function compileShader(
-      gl: WebGLRenderingContext,
-      type: number,
-      source: string,
-      keywords?: string[]
-    ): WebGLShader {
-      source = addKeywords(source, keywords);
-      const shader = gl.createShader(type);
-      if (!shader) throw new Error("Failed to create shader");
-      
-      gl.shaderSource(shader, source);
-      gl.compileShader(shader);
-      
-      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
-        console.trace(gl.getShaderInfoLog(shader));
-      
-      return shader;
-    }
-
-    function createProgram(vertexShader, fragmentShader) {
-      let program = gl.createProgram();
-      gl.attachShader(program, vertexShader);
-      gl.attachShader(program, fragmentShader);
-      gl.linkProgram(program);
-      if (!gl.getProgramParameter(program, gl.LINK_STATUS))
-        console.trace(gl.getProgramInfoLog(program));
-      return program;
-    }
-
-    function getUniforms(program) {
-      let uniforms = [];
-      let uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-      for (let i = 0; i < uniformCount; i++) {
-        let uniformName = gl.getActiveUniform(program, i).name;
-        uniforms[uniformName] = gl.getUniformLocation(program, uniformName);
-      }
-      return uniforms;
-    }
-
-    function addKeywords(source, keywords) {
-      if (!keywords) return source;
-      let keywordsString = "";
-      keywords.forEach((keyword) => {
-        keywordsString += "#define " + keyword + "\n";
-      });
-      return keywordsString + source;
     }
 
     const baseVertexShader = compileShader(
@@ -1392,4 +1356,3 @@ const SplashCursor: React.FC<{
 }
 
 export { SplashCursor };
-
