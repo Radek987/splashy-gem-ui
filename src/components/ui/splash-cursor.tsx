@@ -135,7 +135,7 @@ class Program implements ProgramProps {
 
   constructor(vertexShader: WebGLShader, fragmentShader: WebGLShader) {
     if (!gl) throw new Error("WebGL context not initialized");
-    this.program = createProgram(vertexShader, fragmentShader, null); // Add null as third argument
+    this.program = createProgram(vertexShader, fragmentShader, null);
     this.uniforms = getUniforms(this.program);
   }
 
@@ -1384,3 +1384,4 @@ const SplashCursor: React.FC<{
 }
 
 export { SplashCursor };
+
