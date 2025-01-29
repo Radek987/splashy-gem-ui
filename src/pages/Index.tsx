@@ -6,37 +6,37 @@ import { VantaBackground } from "@/components/VantaBackground";
 const Index = () => {
   return (
     <VantaBackground>
-      <div className="relative min-h-screen">
+      <div className="relative min-h-screen overflow-auto">
         {/* Header/Hero Section */}
         <div className="relative z-10">
         <nav className="container mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
-            <div className="text-2xl font-bold gradient-text">EmailAI</div>
+            <div className="text-2xl font-bold gradient-text drop-shadow-lg">Your Email Manager</div>
             <div className="hidden md:flex space-x-8">
-              <a href="#features" className="text-gray-600 hover:text-gray-900">Features</a>
-              <a href="#pricing" className="text-gray-600 hover:text-gray-900">Pricing</a>
-              <a href="#faq" className="text-gray-600 hover:text-gray-900">FAQ</a>
-              <Button variant="outline">Sign In</Button>
+              <a href="#features" className="text-gray-200 hover:text-white drop-shadow-md transition-colors">Features</a>
+              <a href="#pricing" className="text-gray-200 hover:text-white drop-shadow-md transition-colors">Pricing</a>
+              <a href="#faq" className="text-gray-200 hover:text-white drop-shadow-md transition-colors">FAQ</a>
+              <Button variant="outline" className="shadow-lg">Sign In</Button>
             </div>
           </div>
         </nav>
 
         <main className="container mx-auto px-6 pt-32 pb-24">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-text">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 gradient-text drop-shadow-xl">
               Streamline Your Inbox with AI-Powered Efficiency
             </h1>
-            <h2 className="text-2xl md:text-3xl font-semibold mb-4 gradient-text">
+            <h2 className="text-2xl md:text-3xl font-semibold mb-4 gradient-text drop-shadow-lg">
               Get Daily Summaries, Manage Multiple Emails, and Respond via WhatsApp
             </h2>
-            <p className="text-xl text-gray-600 mb-12">
+            <p className="text-xl text-gray-200 mb-12 drop-shadow-md">
               Stay on top of your email game with an intelligent assistant that simplifies your day.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="text-lg px-8 py-6">
+              <Button size="lg" className="text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-all">
                 Start Free Trial
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-6">
+              <Button size="lg" variant="outline" className="text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-all">
                 Learn More
               </Button>
             </div>
@@ -44,7 +44,6 @@ const Index = () => {
         </main>
         </div>
 
-        {/* Features Section */}
         <section id="features" className="relative z-10 py-24">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-16 gradient-text">
@@ -70,10 +69,10 @@ const Index = () => {
         </div>
         </section>
 
-        {/* Testimonials Section */}
+        {/* Testimonials Section with improved readability */}
         <section className="relative z-10 py-24">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold text-center mb-16 gradient-text">
+          <h2 className="text-4xl font-bold text-center mb-16 gradient-text drop-shadow-xl">
             What Our Users Say
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
@@ -96,7 +95,6 @@ const Index = () => {
         </div>
         </section>
 
-        {/* Pricing Section */}
         <section id="pricing" className="relative z-10 py-24">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-16 gradient-text">
@@ -190,25 +188,25 @@ const Index = () => {
         </div>
         </section>
 
-        {/* Footer */}
-        <footer className="relative z-10 bg-gray-900/80 backdrop-blur-sm text-white py-12">
+        {/* Footer with improved contrast */}
+        <footer className="relative z-10 bg-gray-900/90 backdrop-blur-sm text-white py-12">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">EmailAI</h3>
-              <p className="text-gray-400">Transform your inbox experience</p>
+              <h3 className="text-xl font-bold mb-4 drop-shadow-md">Your Email Manager</h3>
+              <p className="text-gray-300">Transform your inbox experience</p>
             </div>
             <div>
-              <h4 className="text-lg font-semibold mb-4">Links</h4>
+              <h4 className="text-lg font-semibold mb-4 drop-shadow-md">Links</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="text-gray-400 hover:text-white">Privacy Policy</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Terms of Service</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white">Contact Us</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Terms of Service</a></li>
+                <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
               </ul>
             </div>
             <div className="lg:col-span-2">
-              <h4 className="text-lg font-semibold mb-4">Ready to Transform Your Inbox?</h4>
-              <Button size="lg" className="w-full sm:w-auto">
+              <h4 className="text-lg font-semibold mb-4 drop-shadow-md">Ready to Transform Your Inbox?</h4>
+              <Button size="lg" className="w-full sm:w-auto shadow-xl hover:shadow-2xl transition-all">
                 Start Free Today <ArrowRight className="ml-2" />
               </Button>
             </div>
