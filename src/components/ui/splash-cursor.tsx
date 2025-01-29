@@ -18,6 +18,59 @@ interface ProgramProps {
   program: WebGLProgram;
 }
 
+class Material implements MaterialProps {
+  vertexShader: WebGLShader;
+  fragmentShaderSource: string;
+  programs: { [key: number]: WebGLProgram };
+  activeProgram: WebGLProgram | null;
+  uniforms: { [key: string]: WebGLUniformLocation };
+
+  constructor(vertexShader: WebGLShader, fragmentShaderSource: string) {
+    this.vertexShader = vertexShader;
+    this.fragmentShaderSource = fragmentShaderSource;
+    this.programs = [];
+    this.activeProgram = null;
+    this.uniforms = [];
+  }
+
+  setKeywords(keywords: string[]) {
+    let hash = 0;
+    for (let i = 0; i < keywords.length; i++) hash += hashCode(keywords[i]);
+    let program = this.programs[hash];
+    if (program == null) {
+      let fragmentShader = compileShader(
+        gl!.FRAGMENT_SHADER,
+        this.fragmentShaderSource,
+        keywords
+      );
+      program = createProgram(this.vertexShader, fragmentShader, keywords);
+      this.programs[hash] = program;
+    }
+    if (program === this.activeProgram) return;
+    this.uniforms = getUniforms(program);
+    this.activeProgram = program;
+  }
+
+  bind() {
+    gl!.useProgram(this.activeProgram);
+  }
+}
+
+class Program implements ProgramProps {
+  uniforms: { [key: string]: WebGLUniformLocation };
+  program: WebGLProgram;
+
+  constructor(vertexShader: WebGLShader, fragmentShader: WebGLShader) {
+    this.uniforms = {};
+    this.program = createProgram(vertexShader, fragmentShader, null);
+    this.uniforms = getUniforms(this.program);
+  }
+
+  bind() {
+    gl!.useProgram(this.program);
+  }
+}
+
 const SplashCursor: React.FC<{
   SIM_RESOLUTION?: number;
   DYE_RESOLUTION?: number;
@@ -210,48 +263,7 @@ const SplashCursor: React.FC<{
       return status === gl.FRAMEBUFFER_COMPLETE;
     }
 
-    class Material {
-      constructor(vertexShader, fragmentShaderSource) {
-        this.vertexShader = vertexShader;
-        this.fragmentShaderSource = fragmentShaderSource;
-        this.programs = [];
-        this.activeProgram = null;
-        this.uniforms = [];
-      }
-      setKeywords(keywords) {
-        let hash = 0;
-        for (let i = 0; i < keywords.length; i++) hash += hashCode(keywords[i]);
-        let program = this.programs[hash];
-        if (program == null) {
-          let fragmentShader = compileShader(
-            gl.FRAGMENT_SHADER,
-            this.fragmentShaderSource,
-            keywords
-          );
-          program = createProgram(this.vertexShader, fragmentShader);
-          this.programs[hash] = program;
-        }
-        if (program === this.activeProgram) return;
-        this.uniforms = getUniforms(program);
-        this.activeProgram = program;
-      }
-      bind() {
-        gl.useProgram(this.activeProgram);
-      }
-    }
-
-    class Program {
-      constructor(vertexShader, fragmentShader) {
-        this.uniforms = {};
-        this.program = createProgram(vertexShader, fragmentShader);
-        this.uniforms = getUniforms(this.program);
-      }
-      bind() {
-        gl.useProgram(this.program);
-      }
-    }
-
-    function createProgram(vertexShader, fragmentShader) {
+    function createProgram(vertexShader, fragmentShader, keywords) {
       let program = gl.createProgram();
       gl.attachShader(program, vertexShader);
       gl.attachShader(program, fragmentShader);
