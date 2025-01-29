@@ -714,7 +714,8 @@ const SplashCursor: React.FC<{
     const pressureProgram = new Program(baseVertexShader, pressureShader);
     const gradienSubtractProgram = new Program(
       baseVertexShader,
-      gradientSubtractShader
+      gradientSubtractShader,
+      null
     );
     const displayMaterial = new Material(baseVertexShader, displayShaderSource);
 
