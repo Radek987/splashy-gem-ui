@@ -5,6 +5,78 @@ import { useEffect, useRef } from "react";
 // Declare gl as a mutable global variable
 let gl: WebGLRenderingContext | null = null;
 
+// Helper functions
+const hashCode = (s: string): number => {
+  if (s.length === 0) return 0;
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+    hash = (hash << 5) - hash + s.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash;
+};
+
+const compileShader = (type: number, source: string, keywords: string[] | null): WebGLShader => {
+  if (!gl) throw new Error("WebGL context not initialized");
+  
+  const shader = gl.createShader(type);
+  if (!shader) throw new Error("Could not create shader");
+
+  // Add keywords if they exist
+  const finalSource = keywords ? 
+    keywords.map(keyword => `#define ${keyword}\n`).join('') + source : 
+    source;
+
+  gl.shaderSource(shader, finalSource);
+  gl.compileShader(shader);
+
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error(gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+    throw new Error("Could not compile shader");
+  }
+
+  return shader;
+};
+
+const createProgram = (vertexShader: WebGLShader, fragmentShader: WebGLShader, keywords: string[] | null): WebGLProgram => {
+  if (!gl) throw new Error("WebGL context not initialized");
+  
+  const program = gl.createProgram();
+  if (!program) throw new Error("Could not create program");
+
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error(gl.getProgramInfoLog(program));
+    gl.deleteProgram(program);
+    throw new Error("Could not link program");
+  }
+
+  return program;
+};
+
+const getUniforms = (program: WebGLProgram): { [key: string]: WebGLUniformLocation } => {
+  if (!gl) throw new Error("WebGL context not initialized");
+  
+  const uniforms: { [key: string]: WebGLUniformLocation } = {};
+  const uniformCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+
+  for (let i = 0; i < uniformCount; i++) {
+    const uniformInfo = gl.getActiveUniform(program, i);
+    if (uniformInfo) {
+      const location = gl.getUniformLocation(program, uniformInfo.name);
+      if (location) {
+        uniforms[uniformInfo.name] = location;
+      }
+    }
+  }
+
+  return uniforms;
+};
+
 interface MaterialProps {
   vertexShader: WebGLShader;
   fragmentShaderSource: string;
@@ -28,9 +100,9 @@ class Material implements MaterialProps {
   constructor(vertexShader: WebGLShader, fragmentShaderSource: string) {
     this.vertexShader = vertexShader;
     this.fragmentShaderSource = fragmentShaderSource;
-    this.programs = [];
+    this.programs = {};
     this.activeProgram = null;
-    this.uniforms = [];
+    this.uniforms = {};
   }
 
   setKeywords(keywords: string[]) {
@@ -52,7 +124,8 @@ class Material implements MaterialProps {
   }
 
   bind() {
-    gl!.useProgram(this.activeProgram);
+    if (!gl || !this.activeProgram) return;
+    gl.useProgram(this.activeProgram);
   }
 }
 
@@ -61,13 +134,14 @@ class Program implements ProgramProps {
   program: WebGLProgram;
 
   constructor(vertexShader: WebGLShader, fragmentShader: WebGLShader) {
-    this.uniforms = {};
+    if (!gl) throw new Error("WebGL context not initialized");
     this.program = createProgram(vertexShader, fragmentShader, null);
     this.uniforms = getUniforms(this.program);
   }
 
   bind() {
-    gl!.useProgram(this.program);
+    if (!gl) return;
+    gl.useProgram(this.program);
   }
 }
 
@@ -1309,3 +1383,4 @@ const SplashCursor: React.FC<{
 }
 
 export { SplashCursor };
+
