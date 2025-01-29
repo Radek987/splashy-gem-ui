@@ -886,15 +886,7 @@ const SplashCursor: React.FC<{
       param
     ) {
       if (target.width === w && target.height === h) return target;
-      target.read = resizeFBO(
-        target.read,
-        w,
-        h,
-        internalFormat,
-        format,
-        type,
-        param
-      );
+      target.read = resizeFBO(target.read, w, h, internalFormat, format, type, param);
       target.write = createFBO(w, h, internalFormat, format, type, param);
       target.width = w;
       target.height = h;
@@ -1380,3 +1372,4 @@ const SplashCursor: React.FC<{
 }
 
 export { SplashCursor };
+
