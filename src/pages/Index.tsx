@@ -1,15 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { SplashCursor } from "@/components/ui/splash-cursor";
 import { Mail, MessageSquare, Shield, Link, Check, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { VantaBackground } from "@/components/VantaBackground";
 
 const Index = () => {
   return (
-    <div className="relative min-h-screen">
-      <SplashCursor />
-      
-      {/* Header/Hero Section */}
-      <div className="relative z-10">
+    <VantaBackground>
+      <div className="relative min-h-screen">
+        {/* Header/Hero Section */}
+        <div className="relative z-10">
         <nav className="container mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div className="text-2xl font-bold gradient-text">EmailAI</div>
@@ -43,10 +42,10 @@ const Index = () => {
             </div>
           </div>
         </main>
-      </div>
+        </div>
 
-      {/* Features Section */}
-      <section id="features" className="relative z-10 bg-gray-50/80 backdrop-blur-sm py-24">
+        {/* Features Section */}
+        <section id="features" className="relative z-10 py-24">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-16 gradient-text">
             Why Choose Our AI Email Manager?
@@ -69,10 +68,10 @@ const Index = () => {
             />
           </div>
         </div>
-      </section>
+        </section>
 
-      {/* Testimonials Section */}
-      <section className="relative z-10 py-24">
+        {/* Testimonials Section */}
+        <section className="relative z-10 py-24">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-16 gradient-text">
             What Our Users Say
@@ -95,10 +94,10 @@ const Index = () => {
             />
           </div>
         </div>
-      </section>
+        </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="relative z-10 bg-gray-50/80 backdrop-blur-sm py-24">
+        {/* Pricing Section */}
+        <section id="pricing" className="relative z-10 py-24">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-16 gradient-text">
             Simple Plans for Everyone
@@ -140,10 +139,10 @@ const Index = () => {
             />
           </div>
         </div>
-      </section>
+        </section>
 
-      {/* How It Works Section */}
-      <section className="relative z-10 py-24">
+        {/* How It Works Section */}
+        <section className="relative z-10 py-24">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-16 gradient-text">
             Getting Started is Easy!
@@ -166,10 +165,10 @@ const Index = () => {
             />
           </div>
         </div>
-      </section>
+        </section>
 
-      {/* FAQ Section */}
-      <section id="faq" className="relative z-10 bg-gray-50/80 backdrop-blur-sm py-24">
+        {/* FAQ Section */}
+        <section id="faq" className="relative z-10 py-24">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold text-center mb-16 gradient-text">
             Have Questions? We've Got Answers
@@ -189,10 +188,10 @@ const Index = () => {
             />
           </div>
         </div>
-      </section>
+        </section>
 
-      {/* Footer */}
-      <footer className="relative z-10 bg-gray-900 text-white py-12">
+        {/* Footer */}
+        <footer className="relative z-10 bg-gray-900/80 backdrop-blur-sm text-white py-12">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
@@ -215,8 +214,9 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </VantaBackground>
   );
 };
 
