@@ -704,17 +704,18 @@ const SplashCursor: React.FC<{
 
     let dye, velocity, divergence, curl, pressure;
 
-    const copyProgram = new Program(baseVertexShader, copyShader);
-    const clearProgram = new Program(baseVertexShader, clearShader);
-    const splatProgram = new Program(baseVertexShader, splatShader);
-    const advectionProgram = new Program(baseVertexShader, advectionShader);
-    const divergenceProgram = new Program(baseVertexShader, divergenceShader);
-    const curlProgram = new Program(baseVertexShader, curlShader);
-    const vorticityProgram = new Program(baseVertexShader, vorticityShader);
-    const pressureProgram = new Program(baseVertexShader, pressureShader);
+    const copyProgram = new Program(baseVertexShader, copyShader, null);
+    const clearProgram = new Program(baseVertexShader, clearShader, null);
+    const splatProgram = new Program(baseVertexShader, splatShader, null);
+    const advectionProgram = new Program(baseVertexShader, advectionShader, null);
+    const divergenceProgram = new Program(baseVertexShader, divergenceShader, null);
+    const curlProgram = new Program(baseVertexShader, curlShader, null);
+    const vorticityProgram = new Program(baseVertexShader, vorticityShader, null);
+    const pressureProgram = new Program(baseVertexShader, pressureShader, null);
     const gradienSubtractProgram = new Program(
       baseVertexShader,
-      gradientSubtractShader
+      gradientSubtractShader,
+      null
     );
     const displayMaterial = new Material(baseVertexShader, displayShaderSource);
 
@@ -1383,4 +1384,3 @@ const SplashCursor: React.FC<{
 }
 
 export { SplashCursor };
-
